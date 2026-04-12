@@ -1,0 +1,39 @@
+{
+	// Schema reference for wrangler configuration
+	"$schema": "node_modules/wrangler/config-schema.json",
+	// Name of your worker
+	"name": "whitewood",
+	// Entry point for your worker
+	"main": "src/worker.tsx",
+	// Compatibility settings
+	"compatibility_date": "2025-08-21",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	// Assets configuration
+	"assets": {
+		"binding": "ASSETS"
+	},
+	// Observability settings
+	"observability": {
+		"enabled": true
+	},
+	// Environment variables
+	"vars": {
+		"PASSWORD_WORK_FACTOR": 12,
+	},
+	"d1_databases": [
+		{
+			"binding": "DATABASE",
+			"database_name": "DATABASE",
+			"database_id": "6b72f9ec-7feb-44e3-9fe0-ad482dca621d",
+			"migrations_dir": "drizzle"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "whitewood-media"
+		}
+	]
+}

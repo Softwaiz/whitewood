@@ -1,0 +1,92 @@
+.story-ul {
+    list-style-type: disc;
+    margin-left: 24px;
+}
+
+.story-ol {
+    list-style-type: decimal-leading-zero;
+    margin-left: 24px;
+}
+
+.story-h1,
+.story-h2,
+.story-h3,
+.story-h4,
+.story-h5,
+.story-h6 {
+    font-family: var(--font-sans);
+}
+
+.story-h1 {
+    font-weight: 900;
+    font-size: 38px;
+}
+
+.story-h2 {
+    font-weight: 800;
+    font-size: 34px;
+}
+
+.story-h3 {
+    font-weight: 700;
+    font-size: 30px;
+}
+
+.story-h4 {
+    font-weight: 600;
+    font-size: 26px;
+}
+
+.story-h5 {
+    font-weight: 600;
+    font-size: 22px;
+}
+
+.story-h6 {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.story-p {
+    font-weight: 400;
+    font-size: 14px;
+}
+
+
+.story-link {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
+.story-textBold {
+
+}
+
+.story-textCode {
+
+}
+
+.story-textItalic {
+    font-style: italic;
+}
+
+.story-textStrikethrough {
+    text-decoration: line-through;
+}
+
+.story-textSubscript {
+    font-size: 12px;
+}
+
+.story-textSuperscript {
+    font-size: 12px;
+}
+
+.story-textUnderline {
+    text-decoration: underline;
+}
+
+.story-textUnderlineStrikethrough {
+}

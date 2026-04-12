@@ -1,0 +1,15 @@
+.toolbar__item {
+    min-width: 32px;
+    height: 32px;
+    padding: 8px 8px;
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-600);
+    border: 1px solid var(--color-slate-200);
+}
+
+
+.toolbar__item:hover {
+    background-color: var(--color-slate-300);
+    color: var(--color-slate-700);
+    border: 1px solid var(--color-slate-400);
+}
