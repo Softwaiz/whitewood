@@ -1,4 +1,4 @@
-import { layout, prefix, render, route } from "rwsdk/router";
+import { index, layout, prefix, render, route } from "rwsdk/router";
 import { defineApp } from "rwsdk/worker";
 import { setCommonHeaders } from "~/headers";
 import { Home } from "~/pages/home";
@@ -50,10 +50,14 @@ export default defineApp([
       ...layout(ProtectedLayout, [
         route("/", PlatformIndex),
         route("/articles", PlatformArticles),
-        route("/content/media/upload", PlatformMediaUpload),
-        route("/content/new", PlatformNewArticle),
-        route("/content/:cid", PlatformContentDetail),
-        route("/content/:cid/edit", PlatformEditArticle),
+        prefix("/content", [
+          route("/media/upload", PlatformMediaUpload),
+          route("/new", PlatformNewArticle),
+          prefix("/:cid", [
+            index(PlatformContentDetail),
+            route("/edit", PlatformEditArticle),
+          ]),
+        ]),
         route("/users", PlatformUsers),
         route("/users/new", PlatformNewUser),
       ]),

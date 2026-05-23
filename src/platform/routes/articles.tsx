@@ -2,6 +2,7 @@ import { count, desc, eq } from "drizzle-orm";
 import type { RequestInfo } from "rwsdk/worker";
 import { db } from "~db/db";
 import { posts } from "~db/schema";
+import { PageTopbar } from "~platform/components/layout/page-topbar";
 
 export default async function PlatformArticles(props: RequestInfo) {
     const [totalArticlesResult] = await db
@@ -38,26 +39,26 @@ export default async function PlatformArticles(props: RequestInfo) {
 
     return (
         <div className="space-y-8">
-            <section className="rounded-3xl bg-neutral-950 px-6 py-8 text-white shadow-sm">
-                <p className="text-sm uppercase tracking-[0.2em] text-neutral-300">Articles</p>
-                <h1 className="mt-3 text-3xl font-semibold">Your publishing workspace</h1>
-                <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-                    Track the current state of your content and jump straight into opening or editing any article in the system.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                    <a href="/platform/articles" className="rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200">
-                        Refresh articles
-                    </a>
-                    <a href="/platform/content/new" className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-emerald-300">
-                        Create article
-                    </a>
-                    <a href="/platform/users" className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">
-                        Manage users
-                    </a>
-                </div>
-            </section>
+            <PageTopbar
+                eyebrow="Articles"
+                title="Your publishing workspace"
+                description="Track the current state of your content and jump straight into opening or editing any article in the system."
+                actions={(
+                    <>
+                        <a href="/platform/articles" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50">
+                            Refresh articles
+                        </a>
+                        <a href="/platform/content/new" className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800">
+                            Create article
+                        </a>
+                        <a href="/platform/users" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50">
+                            Manage users
+                        </a>
+                    </>
+                )}
+            />
 
-            <section className="grid gap-4 md:grid-cols-3">
+            <section className="grid gap-4 md:grid-cols-3 px-2 md:px-4">
                 <article className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
                     <p className="text-sm text-neutral-500">Published articles</p>
                     <p className="mt-3 text-4xl font-semibold text-neutral-950">{publishedArticles}</p>
@@ -77,7 +78,7 @@ export default async function PlatformArticles(props: RequestInfo) {
                 </article>
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr] px-2 md:px-4">
                 <article className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
                     <h2 className="text-lg font-semibold text-neutral-950">Quick actions</h2>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -102,7 +103,7 @@ export default async function PlatformArticles(props: RequestInfo) {
                 </article>
             </section>
 
-            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm mx-2 md:mx-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">Library</p>

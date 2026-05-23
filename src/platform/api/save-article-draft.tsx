@@ -4,13 +4,33 @@ import { getRequestInfo, serverAction } from "rwsdk/worker";
 import { eq } from "drizzle-orm";
 import { db } from "~db/db";
 import { posts } from "~db/schema";
-import { normalizeArticlePayload } from "~platform/lib/posts";
+import { applyArticleSlug, normalizeArticlePayload } from "~platform/lib/posts";
 import { DraftCookie } from "~platform/cookies/draft.server";
 
 type SaveArticleDraftInput = {
     article: Record<string, any>;
     articleId?: string;
 };
+
+async function ensureUniquePostSlug(baseSlug: string, currentPostId?: string) {
+    let attempt = 0;
+
+    while (true) {
+        const candidateSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+        const [existingPost] = await db
+            .select({ id: posts.id })
+            .from(posts)
+            .where(eq(posts.slug, candidateSlug))
+            .limit(1)
+            .execute();
+
+        if (!existingPost || existingPost.id === currentPostId) {
+            return candidateSlug;
+        }
+
+        attempt += 1;
+    }
+}
 
 export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput) => {
     const requestInfo = getRequestInfo();
@@ -34,7 +54,6 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
         };
     }
 
-    const { title, description, slug, content } = normalizeArticlePayload(article);
     const explicitArticleId = input.articleId?.trim();
     const existingDraftId = DraftCookie.parseRequest(requestInfo.request);
     const targetArticleId = explicitArticleId || existingDraftId;
@@ -57,11 +76,16 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                     };
                 }
 
+                const normalizedArticlePayload = normalizeArticlePayload(article);
+                const slug = await ensureUniquePostSlug(normalizedArticlePayload.slug, targetArticleId);
+                const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
+                const content = JSON.stringify(normalizedArticle);
+
                 await db
                     .update(posts)
                     .set({
-                        title,
-                        description,
+                        title: normalizedArticlePayload.title,
+                        description: normalizedArticlePayload.description,
                         slug,
                         content,
                         authorId: user.id,
@@ -83,15 +107,21 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                     title: "Saved",
                     message: "Your article draft was updated.",
                     articleId: targetArticleId,
+                    slug,
                 };
             }
         }
 
+        const normalizedArticlePayload = normalizeArticlePayload(article);
+        const slug = await ensureUniquePostSlug(normalizedArticlePayload.slug);
+        const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
+        const content = JSON.stringify(normalizedArticle);
+
         const [createdPost] = await db
             .insert(posts)
             .values({
-                title,
-                description,
+                title: normalizedArticlePayload.title,
+                description: normalizedArticlePayload.description,
                 slug,
                 content,
                 published: 0,
@@ -113,6 +143,7 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
             title: "Saved",
             message: "Your article was saved as a draft.",
             articleId: createdPost.id,
+            slug,
         };
     } catch (error: any) {
         return {

@@ -4,10 +4,11 @@ import { Puck, type Data } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { NavLink } from "~components/nav-link";
 import { PuckEditorConfig, type EditorComponents } from "~platform/blog/components/blocks/config";
+import { ErrorBoundary } from "react-error-boundary";
 import { saveArticleDraft } from "~platform/api/save-article-draft";
+import { toast } from "sonner";
 
 type ArticleComposerProps = {
     storageKey?: string;
@@ -55,6 +56,7 @@ export function ArticleComposer({
     }, [articleId, enableLocalCache, serverInitialData, storageKey]);
 
     const composerData = useMemo(() => initialData, [initialData]);
+    const [enabled, setEnabled] = useState(true);
 
     if (!isReady) {
         return (
@@ -81,39 +83,55 @@ export function ArticleComposer({
                     </div>
                 )}
             </div>
-            <Puck
-                data={composerData}
-                config={PuckEditorConfig}
-                onPublish={async (data) => {
-                    const isCreatingFirstDraft = !currentArticleId;
+            {enabled && (
+                <ErrorBoundary fallback={<div>Something went wrong down the line</div>}>
+                    <Puck
+                        data={composerData}
+                        config={PuckEditorConfig}
+                        onAction={(action, appState, prevAppState) => {
+                            console.log(action);
+                        }}
+                        onPublish={async (data) => {
+                            try {
 
-                    if (enableLocalCache && isCreatingFirstDraft) {
-                        localStorage.setItem(storageKey, JSON.stringify(data));
-                    }
+                                const isCreatingFirstDraft = !currentArticleId;
 
-                    const result = await saveArticleDraft({
-                        article: data as Record<string, any>,
-                        articleId: currentArticleId,
-                    });
+                                if (enableLocalCache && isCreatingFirstDraft) {
+                                    localStorage.setItem(storageKey, JSON.stringify(data));
+                                }
 
-                    if (result.success) {
-                        if (result.articleId) {
-                            if (isCreatingFirstDraft && enableLocalCache) {
-                                localStorage.removeItem(storageKey);
+                                const result = await saveArticleDraft({
+                                    article: data as Record<string, any>,
+                                    articleId: currentArticleId,
+                                });
+
+                                if (result.success) {
+                                    if (result.articleId) {
+                                        if (isCreatingFirstDraft && enableLocalCache) {
+                                            localStorage.removeItem(storageKey);
+                                        }
+                                        setCurrentArticleId(result.articleId);
+                                    }
+                                    toast.success(result.title, {
+                                        description: <span className="text-on-light text-sm">{result.message}</span>,
+                                    });
+                                    return;
+                                }
+
+                                toast.error(result.title, {
+                                    description: <span className="text-on-light text-sm">{result.message}</span>,
+                                });
+
+                            } catch (err) {
+                                toast.error("Error", {
+                                    description: <span className="text-on-light text-sm">An error occurred while saving the article.</span>,
+                                });
                             }
-                            setCurrentArticleId(result.articleId);
-                        }
-                        toast.success(result.title, {
-                            description: <span className="text-on-light text-sm">{result.message}</span>,
-                        });
-                        return;
-                    }
+                        }}
 
-                    toast.error(result.title, {
-                        description: <span className="text-on-light text-sm">{result.message}</span>,
-                    });
-                }}
-            />
+                    />
+                </ErrorBoundary>
+            )}
         </div>
     );
 }

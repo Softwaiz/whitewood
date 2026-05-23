@@ -41,7 +41,7 @@ export const RootComponent: ComponentConfig<RootComponentProps> = {
         }
     },
     render({ children, title, description, language, keywords, puck, ...otherProps }) {
-        return <div ref={puck.dragRef} className="w-full min-h-dvh flex flex-col items-start justify-start gap-12">
+        return <div className="w-full min-h-dvh flex flex-col items-start justify-start gap-12">
             <title>{title}</title>
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords?.map((k) => k.label).join(", ")} />
@@ -49,7 +49,7 @@ export const RootComponent: ComponentConfig<RootComponentProps> = {
         </div>
     },
     defaultProps: {
-        slug: "story/this-is-my-story",
+        slug: "",
         keywords: [],
         language: "fr",
         title: "",

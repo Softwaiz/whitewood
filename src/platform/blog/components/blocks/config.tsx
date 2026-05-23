@@ -23,7 +23,7 @@ export interface EditorComponents {
 }
 
 export const PuckEditorConfig: Config<EditorComponents> = {
-    root: RootComponent as any,
+    //root: RootComponent as any,
     components: {
         Title: Title,
         Paragraph: Paragraph,
@@ -40,14 +40,14 @@ export const PuckEditorConfig: Config<EditorComponents> = {
             title: "Typography",
             components: ["Title", "Paragraph"]
         },
-        Multimedia: {
+        /*Multimedia: {
             title: "Multimedia",
             components: ['Image']
         },
         Layout: {
             title: "Layout",
             components: ["Spacer", "Column"]
-        }
-    },
+        }*/
+    }
 
 }

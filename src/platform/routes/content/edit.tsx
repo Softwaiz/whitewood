@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
+import { Suspense } from "react";
 import type { RequestInfo } from "rwsdk/worker";
 import { db } from "~db/db";
 import { posts } from "~db/schema";
-import { ArticleComposer } from "~platform/components/article-composer";
+import LazyArticleComposer from "~platform/components/article-composer-lazy";
 import { parseArticleContent } from "~platform/lib/posts";
 import { redirect } from "~platform/utils/request-context";
 
@@ -28,12 +29,14 @@ export default async function PlatformEditArticle({ params, request, ctx }: Requ
     }
 
     return (
-        <ArticleComposer
-            enableLocalCache={false}
-            articleId={content.id}
-            initialData={parseArticleContent(content.content) ?? {}}
-            backHref={`/platform/content/${content.id}`}
-            backLabel="Back to article"
-        />
+        <Suspense fallback={<div>Loading editor...</div>}>
+            <LazyArticleComposer
+                enableLocalCache={false}
+                articleId={content.id}
+                initialData={parseArticleContent(content.content) ?? {}}
+                backHref={`/platform/content/${content.id}`}
+                backLabel="Back to article"
+            />
+        </Suspense>
     );
 }
