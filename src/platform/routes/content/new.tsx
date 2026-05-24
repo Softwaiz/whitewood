@@ -31,6 +31,7 @@ export default async function PlatformNewArticle({ request, ctx }: RequestInfo) 
         <ArticleComposer
             enableLocalCache={false}
             articleId={draft.id}
+            isPublished={draft.published === 1}
             initialData={parseArticleContent(draft.content) ?? {}}
             availableCollections={collectionOptions}
             backHref={`/platform/content/${draft.id}`}

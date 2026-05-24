@@ -37,6 +37,7 @@ export default async function PlatformEditArticle({ params, request, ctx }: Requ
             <LazyArticleComposer
                 enableLocalCache={false}
                 articleId={content.id}
+                isPublished={content.published === 1}
                 initialData={parseArticleContent(content.content) ?? {}}
                 availableCollections={collectionOptions}
                 initialCollectionIds={initialCollectionIds}

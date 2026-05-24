@@ -10,6 +10,7 @@ type SaveArticleDraftInput = {
     article: Record<string, any>;
     articleId?: string;
     collectionIds?: string[];
+    published?: number;
 };
 
 
@@ -58,11 +59,14 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                 const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
                 const content = JSON.stringify(normalizedArticle);
 
+                const published = input.published ?? existingPost.published;
+
                 await PostResolver.instance().updatePost(targetArticleId, {
                     title: normalizedArticlePayload.title,
                     description: normalizedArticlePayload.description,
                     slug,
                     content,
+                    published,
                     authorId: user.id,
                     updatedAt: new Date().toISOString(),
                 });
@@ -77,12 +81,16 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                     })
                 );
 
+                const isNowPublished = published === 1;
                 return {
                     success: true,
-                    title: "Saved",
-                    message: "Your article draft was updated.",
+                    title: isNowPublished ? "Published" : "Saved",
+                    message: isNowPublished
+                        ? "Your article was saved and published."
+                        : "Your article draft was updated.",
                     articleId: targetArticleId,
                     slug,
+                    published,
                 };
             }
         }
@@ -92,12 +100,14 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
         const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
         const content = JSON.stringify(normalizedArticle);
 
+        const published = input.published ?? 0;
+
         const createdPost = await PostResolver.instance().createPost({
             title: normalizedArticlePayload.title,
             description: normalizedArticlePayload.description,
             slug,
             content,
-            published: 0,
+            published,
             authorId: user.id,
             language: "en",
             keywords: JSON.stringify([]),
@@ -113,12 +123,16 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
             })
         );
 
+        const isNowPublished = published === 1;
         return {
             success: true,
-            title: "Saved",
-            message: "Your article was saved as a draft.",
+            title: isNowPublished ? "Published" : "Saved",
+            message: isNowPublished
+                ? "Your article was created and published."
+                : "Your article was saved as a draft.",
             articleId: createdPost.id,
             slug,
+            published,
         };
     } catch (error: any) {
         return {
