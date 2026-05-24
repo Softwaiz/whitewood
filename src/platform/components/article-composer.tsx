@@ -2,13 +2,19 @@
 
 import { Puck, type Data } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Tags } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "~components/nav-link";
 import { PuckEditorConfig, type EditorComponents } from "~platform/blog/components/blocks/config";
 import { ErrorBoundary } from "react-error-boundary";
 import { saveArticleDraft } from "~platform/api/save-article-draft";
 import { toast } from "sonner";
+
+type CollectionOption = {
+    id: string;
+    label: string;
+    slug: string;
+};
 
 type ArticleComposerProps = {
     storageKey?: string;
@@ -17,6 +23,8 @@ type ArticleComposerProps = {
     initialData?: Partial<Data<EditorComponents>>;
     backHref?: string;
     backLabel?: string;
+    availableCollections?: CollectionOption[];
+    initialCollectionIds?: string[];
 };
 
 export function ArticleComposer({
@@ -26,10 +34,13 @@ export function ArticleComposer({
     initialData: serverInitialData,
     backHref = "/platform",
     backLabel = "Back to platform",
+    availableCollections = [],
+    initialCollectionIds = [],
 }: ArticleComposerProps) {
     const [initialData, setInitialData] = useState<Partial<Data<EditorComponents>>>(serverInitialData ?? {});
     const [isReady, setIsReady] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(articleId);
+    const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(initialCollectionIds);
 
     useEffect(() => {
         if (serverInitialData && Object.keys(serverInitialData).length > 0) {
@@ -83,6 +94,36 @@ export function ArticleComposer({
                     </div>
                 )}
             </div>
+            {availableCollections.length > 0 && (
+                <div className="w-full bg-white border-b border-neutral-200 px-4 py-2.5 flex items-center gap-2 flex-wrap">
+                    <Tags size={14} className="text-neutral-400 shrink-0" />
+                    <span className="text-xs text-neutral-500 font-medium shrink-0">Collections:</span>
+                    {availableCollections.map((col) => {
+                        const isSelected = selectedCollectionIds.includes(col.id);
+                        return (
+                            <button
+                                key={col.id}
+                                type="button"
+                                onClick={() => {
+                                    setSelectedCollectionIds((prev) =>
+                                        isSelected
+                                            ? prev.filter((id) => id !== col.id)
+                                            : [...prev, col.id]
+                                    );
+                                }}
+                                className={`rounded-full px-3 py-1 text-xs font-medium transition border ${
+                                    isSelected
+                                        ? "bg-neutral-950 text-white border-neutral-950"
+                                        : "bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50"
+                                }`}
+                            >
+                                {col.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
             {enabled && (
                 <ErrorBoundary fallback={<div>Something went wrong down the line</div>}>
                     <Puck
@@ -103,6 +144,7 @@ export function ArticleComposer({
                                 const result = await saveArticleDraft({
                                     article: data as Record<string, any>,
                                     articleId: currentArticleId,
+                                    collectionIds: selectedCollectionIds,
                                 });
 
                                 if (result.success) {

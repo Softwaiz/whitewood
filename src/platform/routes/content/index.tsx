@@ -3,12 +3,14 @@ import { and, eq } from "drizzle-orm";
 import type { RequestInfo } from "rwsdk/worker";
 import { db } from "~db/db";
 import { posts } from "~db/schema";
+import type { Collection } from "~db/schema";
 import { PuckEditorConfig } from "~platform/blog/components/blocks/config";
 import { Button } from "~components/ui/button";
 import { redirect } from "~platform/utils/request-context";
 import { parseArticleContent } from "~platform/lib/posts";
 import { PageTopbar } from "~platform/components/layout/page-topbar";
 import { PostResolver } from "~platform/@resolvers/post";
+import { CollectionResolver } from "~platform/@resolvers/collection";
 
 export default async function PlatformContentDetail({ params, request, ctx }: RequestInfo) {
     const contentId = params.cid;
@@ -28,6 +30,8 @@ export default async function PlatformContentDetail({ params, request, ctx }: Re
     if (!article) {
         return redirect(`/platform/content/${content.id}/edit`, { request });
     }
+
+    const postCollections = await CollectionResolver.instance().getCollectionsByPost(contentId);
 
     return (
         <div className="space-y-8">
@@ -53,6 +57,16 @@ export default async function PlatformContentDetail({ params, request, ctx }: Re
                     </span>
                     <span>Slug: {content.slug}</span>
                 </div>
+                {postCollections.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5 items-center">
+                        <span className="text-xs text-neutral-400 font-medium">Collections:</span>
+                        {postCollections.map((col: Collection) => (
+                            <span key={col.id} className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">
+                                {col.label}
+                            </span>
+                        ))}
+                    </div>
+                )}
             </section>
 
             <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-neutral-200">

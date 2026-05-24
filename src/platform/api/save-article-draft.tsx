@@ -4,10 +4,12 @@ import { getRequestInfo, serverAction } from "rwsdk/worker";
 import { applyArticleSlug, ensureUniquePostSlug, normalizeArticlePayload } from "~platform/lib/posts";
 import { DraftCookie } from "~platform/cookies/draft.server";
 import { PostResolver } from "~platform/@resolvers/post";
+import { CollectionResolver } from "~platform/@resolvers/collection";
 
 type SaveArticleDraftInput = {
     article: Record<string, any>;
     articleId?: string;
+    collectionIds?: string[];
 };
 
 
@@ -36,6 +38,7 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
     const explicitArticleId = input.articleId?.trim();
     const existingDraftId = DraftCookie.parseRequest(requestInfo.request);
     const targetArticleId = explicitArticleId || existingDraftId;
+    const collectionIds = input.collectionIds ?? [];
 
     try {
         if (targetArticleId) {
@@ -63,6 +66,8 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                     authorId: user.id,
                     updatedAt: new Date().toISOString(),
                 });
+
+                await CollectionResolver.instance().setPostCollections(targetArticleId, collectionIds);
 
                 requestInfo.response.headers.set(
                     "Set-Cookie",
@@ -97,6 +102,8 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
             language: "en",
             keywords: JSON.stringify([]),
         });
+
+        await CollectionResolver.instance().setPostCollections(createdPost.id, collectionIds);
 
         requestInfo.response.headers.set(
             "Set-Cookie",

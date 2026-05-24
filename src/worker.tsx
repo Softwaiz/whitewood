@@ -19,6 +19,8 @@ import PlatformIndex from "./platform/routes/index";
 import PlatformSetup from "./platform/routes/setup";
 import PlatformUsers from "./platform/routes/users/index";
 import PlatformNewUser from "./platform/routes/users/new";
+import PlatformCollections from "./platform/routes/collections/index";
+import PlatformNewCollection from "./platform/routes/collections/new";
 import { User } from "./db/schema";
 
 export interface Env {
@@ -60,6 +62,8 @@ export default defineApp([
         ]),
         route("/users", PlatformUsers),
         route("/users/new", PlatformNewUser),
+        route("/collections", PlatformCollections),
+        route("/collections/new", PlatformNewCollection),
       ]),
     ])
   ])

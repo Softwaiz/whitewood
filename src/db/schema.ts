@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { sql } from 'drizzle-orm';
 
 let counter = 0;
@@ -38,6 +38,23 @@ export const users = sqliteTable('users', {
     updatedAt: text('updated_at').notNull().default(sql`(datetime('now', 'localtime'))`),
 });
 
+export const collections = sqliteTable('collections', {
+    id: text('id').primaryKey().$defaultFn(() => createId()),
+    label: text('label').notNull(),
+    description: text('description'),
+    slug: text('slug').notNull().unique(),
+    organizationId: text('organization_id').notNull().references(() => organizations.id),
+    createdAt: text('created_at').notNull().default(sql`(datetime('now', 'localtime'))`),
+    updatedAt: text('updated_at').notNull().default(sql`(datetime('now', 'localtime'))`),
+});
+
+export const postCollections = sqliteTable('post_collections', {
+    postId: text('post_id').notNull().references(() => posts.id),
+    collectionId: text('collection_id').notNull().references(() => collections.id),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.postId, table.collectionId] }),
+}));
+
 export const posts = sqliteTable('posts', {
     id: text('id').primaryKey().$defaultFn(() => createId()),
     title: text('title').notNull(),
@@ -57,6 +74,12 @@ export type OrganizationInsert = typeof organizations.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type UserInsert = typeof users.$inferInsert;
+
+export type Collection = typeof collections.$inferSelect;
+export type CollectionInsert = typeof collections.$inferInsert;
+
+export type PostCollection = typeof postCollections.$inferSelect;
+export type PostCollectionInsert = typeof postCollections.$inferInsert;
 
 export type Post = typeof posts.$inferSelect;
 export type PostInsert = typeof posts.$inferInsert;

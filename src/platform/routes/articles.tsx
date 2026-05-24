@@ -1,6 +1,8 @@
 import type { RequestInfo } from "rwsdk/worker";
 import { PageTopbar } from "~platform/components/layout/page-topbar";
 import { PostResolver } from "~platform/@resolvers/post";
+import { CollectionResolver } from "~platform/@resolvers/collection";
+import type { Collection } from "~db/schema";
 
 export default async function PlatformArticles(props: RequestInfo) {
     const totalArticles = await PostResolver.instance().countPosts();
@@ -11,6 +13,9 @@ export default async function PlatformArticles(props: RequestInfo) {
         orderBy: 'updatedAt',
         orderDir: 'desc',
     });
+
+    const postIds = articles.map(a => a.id);
+    const collectionsByPost = await CollectionResolver.instance().getCollectionsByPostIds(postIds);
 
     const draftArticles = Math.max(totalArticles - publishedArticles, 0);
     const publicationRate = totalArticles > 0
@@ -34,6 +39,11 @@ export default async function PlatformArticles(props: RequestInfo) {
                         <a href="/platform/users" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50">
                             Manage users
                         </a>
+                        {props.ctx.user?.role === "root" && (
+                            <a href="/platform/collections" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50">
+                                Manage collections
+                            </a>
+                        )}
                     </>
                 )}
             />
@@ -113,6 +123,7 @@ export default async function PlatformArticles(props: RequestInfo) {
                             <thead className="bg-neutral-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Article</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Collections</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Status</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Updated</th>
                                     <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-500">Actions</th>
@@ -132,6 +143,19 @@ export default async function PlatformArticles(props: RequestInfo) {
                                                 <p className="mt-2 text-xs text-neutral-400">
                                                     /{article.slug}
                                                 </p>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {(collectionsByPost[article.id] || []).length === 0 ? (
+                                                    <span className="text-xs text-neutral-400">—</span>
+                                                ) : (
+                                                    (collectionsByPost[article.id] || []).map((col: Collection) => (
+                                                        <span key={col.id} className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
+                                                            {col.label}
+                                                        </span>
+                                                    ))
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">

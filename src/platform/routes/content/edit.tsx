@@ -4,6 +4,7 @@ import LazyArticleComposer from "~platform/components/article-composer-lazy";
 import { parseArticleContent } from "~platform/lib/posts";
 import { redirect } from "~platform/utils/request-context";
 import { PostResolver } from "~platform/@resolvers/post";
+import { CollectionResolver } from "~platform/@resolvers/collection";
 
 export default async function PlatformEditArticle({ params, request, ctx }: RequestInfo) {
     const contentId = params.cid;
@@ -18,12 +19,27 @@ export default async function PlatformEditArticle({ params, request, ctx }: Requ
         return redirect("/platform/content/new", { request });
     }
 
+    const collections = ctx.user.organizationId
+        ? await CollectionResolver.instance().getCollections(ctx.user.organizationId)
+        : [];
+
+    const collectionOptions = collections.map((c) => ({
+        id: c.id,
+        label: c.label,
+        slug: c.slug,
+    }));
+
+    const postCollections = await CollectionResolver.instance().getCollectionsByPost(contentId);
+    const initialCollectionIds = postCollections.map((c) => c.id);
+
     return (
         <Suspense fallback={<div>Loading editor...</div>}>
             <LazyArticleComposer
                 enableLocalCache={false}
                 articleId={content.id}
                 initialData={parseArticleContent(content.content) ?? {}}
+                availableCollections={collectionOptions}
+                initialCollectionIds={initialCollectionIds}
                 backHref={`/platform/content/${content.id}`}
                 backLabel="Back to article"
             />

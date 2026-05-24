@@ -33,6 +33,50 @@ The system separates **layout (blocks)** from **content (text)** while allowing 
 
 ---
 
+## 🧩 Collections / Categories
+
+Posts can be organized into **collections** (categories). Each collection:
+
+- Belongs to an organization (organization-scoped)
+- Has a label, optional description, and unique slug
+- Can contain many posts; a post can belong to many collections (many-to-many)
+
+### Collection Management
+
+- Only users with `role === "root"` can create, update, or delete collections
+- Collections are managed via `/platform/collections` and `/platform/collections/new`
+- During article creation/editing, authors pick from existing collections via the composer UI
+
+### Collection Data Model
+
+- `collections` table: `id`, `label`, `description`, `slug`, `organizationId`, `createdAt`, `updatedAt`
+- `post_collections` junction table: `postId`, `collectionId` (composite PK)
+
+### Collection Files
+
+- Schema: `src/platform/schemas/collection.ts` → `CreateCollectionSchema`, `UpdateCollectionSchema`
+- Resolver: `src/platform/@resolvers/collection.ts` → `CollectionResolver`
+- API actions: `src/platform/api/create-collection.tsx`, `update-collection.tsx`, `delete-collection.tsx`
+- Routes: `src/platform/routes/collections/index.tsx` (list), `new.tsx` (create form)
+
+### Collection Resolver Methods
+
+| Method | Purpose |
+|---|---|
+| `getCollection(id)` | Fetch single collection |
+| `getCollectionBySlug(slug, orgId)` | Fetch by slug within org |
+| `getCollections(orgId)` | List all collections for an org |
+| `createCollection(data)` | Create a new collection |
+| `updateCollection(id, data)` | Update a collection |
+| `deleteCollection(id)` | Delete collection and its post associations |
+| `getCollectionsByPost(postId)` | Get collections linked to a post |
+| `getCollectionsByPostIds(postIds)` | Batch-fetch collections for multiple posts |
+| `setPostCollections(postId, ids)` | Replace all collection associations for a post |
+| `addPostToCollection(postId, collectionId)` | Add single association |
+| `removePostFromCollection(postId, collectionId)` | Remove single association |
+
+---
+
 ## 🧠 Core Architecture
 
 ### Blocks vs Content
@@ -182,6 +226,10 @@ When creating server-side logic:
 /queries → serverQuery implementations  
 /actions → serverAction implementations  
 /lib → shared utilities  
+/src/platform/@resolvers → data access layer (PostResolver, UserResolver, OrganizationResolver, CollectionResolver)  
+/src/platform/schemas → Zod validation schemas  
+/src/platform/api → serverAction API endpoints  
+/src/platform/routes → page routes (articles, content, users, collections)  
 
 ---
 
