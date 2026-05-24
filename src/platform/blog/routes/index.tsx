@@ -9,6 +9,7 @@ import { DraftCookie } from "~platform/cookies/draft.server";
 import { type Post } from "../../../@types";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { NavLink } from "~components/nav-link";
 
 export function clientLoader(args: Route.ClientLoaderArgs) {
     const cacheData = localStorage.getItem("article.new");
@@ -136,10 +137,10 @@ export default function Home(props: Route.ComponentProps) {
                 Content Editor - Softwaiz Org
             </title>
             <div className="w-full h-12 bg-white border-b border-input flex items-center px-4 sticky top-0 z-50">
-                <Link to={`/platform`} className="text-xs flex items-center gap-2 hover:underline">
+                <NavLink href={`/platform`} className="text-xs flex items-center gap-2 hover:underline">
                     <ArrowLeft size={14} />
                     Back to platform
-                </Link>
+                </NavLink>
             </div>
             <ArticleComposer
                 data={initialData}

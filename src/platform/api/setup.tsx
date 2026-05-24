@@ -1,13 +1,12 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getRequestInfo, serverAction } from "rwsdk/worker";
-import { db } from "~db/db";
 import { hashPassword } from "~lib/auth";
-import { organizations, users } from "~db/schema";
 import { UserCookie } from "~platform/cookies/user.server";
 import { SetupInput, SetupSchema } from "~platform/schemas/setup";
+import { OrganizationResolver } from "~platform/@resolvers/organization";
+import { UserResolver } from "~platform/@resolvers/user";
 
 function createUserSlug(email: string) {
     return `${email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Math.random().toString(36).substring(2, 7)}`;
@@ -21,24 +20,15 @@ export const setupPlatform = serverAction(async (input: SetupInput) => {
         return { success: false, error: result.error.message };
     }
 
-    const [existingUser] = await db
-        .select({ id: users.id })
-        .from(users)
-        .limit(1)
-        .execute();
+    const userCount = await UserResolver.instance().countUsers();
 
-    if (existingUser) {
+    if (userCount > 0) {
         return { success: false, error: "Whitewood has already been initialized." };
     }
 
-    const existingEmail = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, result.data.email))
-        .limit(1)
-        .execute();
+    const existingEmail = await UserResolver.instance().getUserByEmail(result.data.email);
 
-    if (existingEmail.length > 0) {
+    if (existingEmail) {
         return { success: false, error: "Email is already registered." };
     }
 
@@ -46,13 +36,13 @@ export const setupPlatform = serverAction(async (input: SetupInput) => {
     const workFactor = parseInt(workFactorRaw?.toString() || "12", 10);
     const hashedPassword = await hashPassword(result.data.password, workFactor);
 
-    const [organization] = await db.insert(organizations).values({
+    const organization = await OrganizationResolver.instance().createOrganization({
         label: result.data.organizationLabel,
         description: result.data.organizationDescription || null,
         image: result.data.organizationImage || null,
-    }).returning().execute();
+    });
 
-    const [user] = await db.insert(users).values({
+    const user = await UserResolver.instance().createUser({
         firstName: result.data.firstName,
         lastName: result.data.lastName,
         email: result.data.email,
@@ -60,7 +50,9 @@ export const setupPlatform = serverAction(async (input: SetupInput) => {
         role: "root",
         organizationId: organization.id,
         slug: createUserSlug(result.data.email),
-    }).returning().execute();
+        googleAuthEmail: null,
+        googleAuthId: null,
+    });
 
     const serialized = await UserCookie.serialize(user.id);
     requestInfo.response.headers.set("Set-Cookie", serialized);

@@ -1,3 +1,5 @@
+import { PostResolver } from "~platform/@resolvers/post";
+
 const DEFAULT_ARTICLE_SLUG = "story/this-is-my-story";
 
 export function slugify(value: string) {
@@ -57,6 +59,18 @@ export function applyArticleSlug(article: Record<string, any>, slug: string) {
             },
         },
     };
+}
+
+export async function ensureUniquePostSlug(baseSlug: string, currentPostId?: string) {
+    let attempt = 0;
+    while (true) {
+        const candidateSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+        const existingPost = await PostResolver.instance().getPostBySlug(candidateSlug);
+        if (!existingPost || existingPost.id === currentPostId) {
+            return candidateSlug;
+        }
+        attempt += 1;
+    }
 }
 
 export function parseArticleContent(content: string) {

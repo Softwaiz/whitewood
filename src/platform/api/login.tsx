@@ -1,12 +1,10 @@
 "use server";
 
 import { serverAction, getRequestInfo } from "rwsdk/worker";
-import { eq } from "drizzle-orm";
-import { users } from "~db/schema";
 import { verifyPassword } from "~lib/auth";
 import { UserCookie } from "~platform/cookies/user.server";
-import { db } from "~db/db";
 import { LoginInput, LoginSchema } from "../schemas/login";
+import { UserResolver } from "~platform/@resolvers/user";
 
 export const login = serverAction(async (input: LoginInput) => {
     const requestInfo = getRequestInfo();
@@ -18,14 +16,7 @@ export const login = serverAction(async (input: LoginInput) => {
 
     const { email, password } = result.data;
 
-    const userResult = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1)
-        .execute();
-
-    const user = userResult[0];
+    const user = await UserResolver.instance().getUserByEmail(email);
 
     if (!user?.password) {
         return { success: false, error: "Invalid email or password." };

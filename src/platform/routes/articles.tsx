@@ -1,37 +1,17 @@
-import { count, desc, eq } from "drizzle-orm";
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { posts } from "~db/schema";
 import { PageTopbar } from "~platform/components/layout/page-topbar";
+import { PostResolver } from "~platform/@resolvers/post";
 
 export default async function PlatformArticles(props: RequestInfo) {
-    const [totalArticlesResult] = await db
-        .select({ value: count() })
-        .from(posts)
-        .execute();
+    const totalArticles = await PostResolver.instance().countPosts();
 
-    const [publishedArticlesResult] = await db
-        .select({ value: count() })
-        .from(posts)
-        .where(eq(posts.published, 1))
-        .execute();
+    const publishedArticles = await PostResolver.instance().countPosts({ published: 1 });
 
-    const articles = await db
-        .select({
-            id: posts.id,
-            title: posts.title,
-            description: posts.description,
-            slug: posts.slug,
-            published: posts.published,
-            createdAt: posts.createdAt,
-            updatedAt: posts.updatedAt,
-        })
-        .from(posts)
-        .orderBy(desc(posts.updatedAt))
-        .execute();
+    const articles = await PostResolver.instance().getPosts({
+        orderBy: 'updatedAt',
+        orderDir: 'desc',
+    });
 
-    const totalArticles = totalArticlesResult?.value ?? 0;
-    const publishedArticles = publishedArticlesResult?.value ?? 0;
     const draftArticles = Math.max(totalArticles - publishedArticles, 0);
     const publicationRate = totalArticles > 0
         ? Math.round((publishedArticles / totalArticles) * 100)

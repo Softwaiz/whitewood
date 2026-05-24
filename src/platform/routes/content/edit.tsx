@@ -1,11 +1,9 @@
-import { and, eq } from "drizzle-orm";
 import { Suspense } from "react";
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { posts } from "~db/schema";
 import LazyArticleComposer from "~platform/components/article-composer-lazy";
 import { parseArticleContent } from "~platform/lib/posts";
 import { redirect } from "~platform/utils/request-context";
+import { PostResolver } from "~platform/@resolvers/post";
 
 export default async function PlatformEditArticle({ params, request, ctx }: RequestInfo) {
     const contentId = params.cid;
@@ -14,15 +12,7 @@ export default async function PlatformEditArticle({ params, request, ctx }: Requ
         return redirect("/platform/content/new", { request });
     }
 
-    const [content] = await db
-        .select({
-            id: posts.id,
-            content: posts.content,
-        })
-        .from(posts)
-        .where(and(eq(posts.id, contentId), eq(posts.authorId, ctx.user.id)))
-        .limit(1)
-        .execute();
+    const content = await PostResolver.instance().getPostByIdAndAuthor(contentId, ctx.user.id);
 
     if (!content) {
         return redirect("/platform/content/new", { request });

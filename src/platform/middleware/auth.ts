@@ -1,9 +1,7 @@
-import { count, eq } from "drizzle-orm";
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { users } from "~db/schema";
 import { UserCookie } from "~platform/cookies/user.server";
 import { redirect } from "~platform/utils/request-context";
+import { UserResolver } from "~platform/@resolvers/user";
 
 export async function loadCurrentUser({ request, ctx }: RequestInfo) {
     const userId = UserCookie.parseRequest(request);
@@ -13,12 +11,7 @@ export async function loadCurrentUser({ request, ctx }: RequestInfo) {
         return;
     }
 
-    const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1)
-        .execute();
+    const user = await UserResolver.instance().getUser(userId);
 
     ctx.user = user ?? null;
 }
@@ -30,10 +23,7 @@ export function requirePlatformUser({ request, ctx }: RequestInfo) {
 }
 
 export async function isPlatformInitialized() {
-    const [result] = await db
-        .select({ value: count() })
-        .from(users)
-        .execute();
+    const userCount = await UserResolver.instance().countUsers();
 
-    return (result?.value ?? 0) > 0;
+    return userCount > 0;
 }

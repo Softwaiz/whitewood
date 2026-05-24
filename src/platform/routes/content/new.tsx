@@ -1,10 +1,8 @@
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { posts } from "~db/schema";
 import { ArticleComposer } from "~platform/components/article-composer";
 import { DraftCookie } from "~platform/cookies/draft.server";
 import { parseArticleContent } from "~platform/lib/posts";
-import { and, eq } from "drizzle-orm";
+import { PostResolver } from "~platform/@resolvers/post";
 
 export default async function PlatformNewArticle({ request, ctx }: RequestInfo) {
     const draftId = DraftCookie.parseRequest(request);
@@ -13,15 +11,7 @@ export default async function PlatformNewArticle({ request, ctx }: RequestInfo) 
         return <ArticleComposer enableLocalCache />;
     }
 
-    const [draft] = await db
-        .select({
-            id: posts.id,
-            content: posts.content,
-        })
-        .from(posts)
-        .where(and(eq(posts.id, draftId), eq(posts.authorId, ctx.user.id)))
-        .limit(1)
-        .execute();
+    const draft = await PostResolver.instance().getPostByIdAndAuthor(draftId, ctx.user.id);
 
     if (!draft) {
         return <ArticleComposer enableLocalCache />;

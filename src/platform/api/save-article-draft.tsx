@@ -1,36 +1,15 @@
 "use server";
 
 import { getRequestInfo, serverAction } from "rwsdk/worker";
-import { eq } from "drizzle-orm";
-import { db } from "~db/db";
-import { posts } from "~db/schema";
-import { applyArticleSlug, normalizeArticlePayload } from "~platform/lib/posts";
+import { applyArticleSlug, ensureUniquePostSlug, normalizeArticlePayload } from "~platform/lib/posts";
 import { DraftCookie } from "~platform/cookies/draft.server";
+import { PostResolver } from "~platform/@resolvers/post";
 
 type SaveArticleDraftInput = {
     article: Record<string, any>;
     articleId?: string;
 };
 
-async function ensureUniquePostSlug(baseSlug: string, currentPostId?: string) {
-    let attempt = 0;
-
-    while (true) {
-        const candidateSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
-        const [existingPost] = await db
-            .select({ id: posts.id })
-            .from(posts)
-            .where(eq(posts.slug, candidateSlug))
-            .limit(1)
-            .execute();
-
-        if (!existingPost || existingPost.id === currentPostId) {
-            return candidateSlug;
-        }
-
-        attempt += 1;
-    }
-}
 
 export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput) => {
     const requestInfo = getRequestInfo();
@@ -60,12 +39,7 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
 
     try {
         if (targetArticleId) {
-            const [existingPost] = await db
-                .select({ id: posts.id, authorId: posts.authorId })
-                .from(posts)
-                .where(eq(posts.id, targetArticleId))
-                .limit(1)
-                .execute();
+            const existingPost = await PostResolver.instance().getPost(targetArticleId);
 
             if (existingPost) {
                 if (existingPost.authorId !== user.id) {
@@ -81,18 +55,14 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
                 const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
                 const content = JSON.stringify(normalizedArticle);
 
-                await db
-                    .update(posts)
-                    .set({
-                        title: normalizedArticlePayload.title,
-                        description: normalizedArticlePayload.description,
-                        slug,
-                        content,
-                        authorId: user.id,
-                        updatedAt: new Date().toISOString(),
-                    })
-                    .where(eq(posts.id, targetArticleId))
-                    .execute();
+                await PostResolver.instance().updatePost(targetArticleId, {
+                    title: normalizedArticlePayload.title,
+                    description: normalizedArticlePayload.description,
+                    slug,
+                    content,
+                    authorId: user.id,
+                    updatedAt: new Date().toISOString(),
+                });
 
                 requestInfo.response.headers.set(
                     "Set-Cookie",
@@ -117,18 +87,16 @@ export const saveArticleDraft = serverAction(async (input: SaveArticleDraftInput
         const normalizedArticle = applyArticleSlug(normalizedArticlePayload.article, slug);
         const content = JSON.stringify(normalizedArticle);
 
-        const [createdPost] = await db
-            .insert(posts)
-            .values({
-                title: normalizedArticlePayload.title,
-                description: normalizedArticlePayload.description,
-                slug,
-                content,
-                published: 0,
-                authorId: user.id,
-            })
-            .returning({ id: posts.id })
-            .execute();
+        const createdPost = await PostResolver.instance().createPost({
+            title: normalizedArticlePayload.title,
+            description: normalizedArticlePayload.description,
+            slug,
+            content,
+            published: 0,
+            authorId: user.id,
+            language: "en",
+            keywords: JSON.stringify([]),
+        });
 
         requestInfo.response.headers.set(
             "Set-Cookie",

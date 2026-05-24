@@ -1,12 +1,10 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getRequestInfo, serverAction } from "rwsdk/worker";
-import { db } from "~db/db";
 import { hashPassword } from "~lib/auth";
-import { users } from "~db/schema";
 import { CreateUserInput, CreateUserSchema } from "~platform/schemas/users";
+import { UserResolver } from "~platform/@resolvers/user";
 
 function createUserSlug(email: string) {
     return `${email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Math.random().toString(36).substring(2, 7)}`;
@@ -33,14 +31,9 @@ export const createUser = serverAction(async (input: CreateUserInput) => {
         return { success: false, error: result.error.message };
     }
 
-    const existingUser = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, result.data.email))
-        .limit(1)
-        .execute();
+    const existingUser = await UserResolver.instance().getUserByEmail(result.data.email);
 
-    if (existingUser.length > 0) {
+    if (existingUser) {
         return { success: false, error: "Email is already registered." };
     }
 
@@ -48,7 +41,7 @@ export const createUser = serverAction(async (input: CreateUserInput) => {
     const workFactor = parseInt(workFactorRaw?.toString() || "12", 10);
     const hashedPassword = await hashPassword(result.data.password, workFactor);
 
-    await db.insert(users).values({
+    await UserResolver.instance().createUser({
         firstName: result.data.firstName,
         lastName: result.data.lastName,
         email: result.data.email,
@@ -56,7 +49,9 @@ export const createUser = serverAction(async (input: CreateUserInput) => {
         role: result.data.role,
         organizationId: currentUser.organizationId,
         slug: createUserSlug(result.data.email),
-    }).execute();
+        googleAuthEmail: null,
+        googleAuthId: null,
+    });
 
     return { success: true };
 }, { method: "POST" });

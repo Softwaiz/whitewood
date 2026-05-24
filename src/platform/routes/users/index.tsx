@@ -1,20 +1,9 @@
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { users } from "~db/schema";
 import { PageTopbar } from "~platform/components/layout/page-topbar";
+import { UserResolver } from "~platform/@resolvers/user";
 
 export default async function UsersList(props: RequestInfo) {
-    const platformUsers = await db
-        .select({
-            id: users.id,
-            firstName: users.firstName,
-            lastName: users.lastName,
-            email: users.email,
-            role: users.role,
-            createdAt: users.createdAt,
-        })
-        .from(users)
-        .execute();
+    const platformUsers = await UserResolver.instance().getUsers();
 
     return (
         <div className="space-y-6">

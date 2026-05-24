@@ -8,6 +8,7 @@ import { Button } from "~components/ui/button";
 import { redirect } from "~platform/utils/request-context";
 import { parseArticleContent } from "~platform/lib/posts";
 import { PageTopbar } from "~platform/components/layout/page-topbar";
+import { PostResolver } from "~platform/@resolvers/post";
 
 export default async function PlatformContentDetail({ params, request, ctx }: RequestInfo) {
     const contentId = params.cid;
@@ -16,12 +17,7 @@ export default async function PlatformContentDetail({ params, request, ctx }: Re
         return redirect("/platform/content/new", { request });
     }
 
-    const [content] = await db
-        .select()
-        .from(posts)
-        .where(and(eq(posts.id, contentId), eq(posts.authorId, ctx.user.id)))
-        .limit(1)
-        .execute();
+    const content = await PostResolver.instance().getPostByIdAndAuthor(contentId, ctx.user.id);
 
     if (!content) {
         return redirect("/platform/content/new", { request });
