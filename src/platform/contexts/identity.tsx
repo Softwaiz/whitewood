@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, type PropsWithChildren } from "react";
 import { User } from "~db/schema";
 
@@ -8,7 +10,7 @@ export function useIdentity() {
     const value = useContext(IdentityContext);
 
     if (!value) {
-        throw new Error("useIdentity must be used within an IdetityProvider");
+        throw new Error("useIdentity must be used within an IdentityProvider");
     }
     return value;
 }

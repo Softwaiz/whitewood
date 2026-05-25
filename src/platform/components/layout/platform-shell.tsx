@@ -1,6 +1,7 @@
 import type { LayoutProps } from "rwsdk/router";
 import { PlatformSidebar } from "./platform-sidebar";
 import { OrganizationResolver } from "~platform/@resolvers/organization";
+import { IdentityProvider } from "~platform/contexts/identity";
 
 export async function PlatformShell({ children, requestInfo }: LayoutProps) {
     const user = requestInfo?.ctx.user;
@@ -12,13 +13,15 @@ export async function PlatformShell({ children, requestInfo }: LayoutProps) {
     const organizationDescription = organization?.description || "Publishing platform";
 
     return (
-        <PlatformSidebar
-            organizationLabel={organizationLabel}
-            organizationDescription={organizationDescription}
-            pathname={pathname}
-            user={user ?? null}
-        >
-            {children}
-        </PlatformSidebar>
+        <IdentityProvider user={user!}>
+            <PlatformSidebar
+                organizationLabel={organizationLabel}
+                organizationDescription={organizationDescription}
+                pathname={pathname}
+                user={user ?? null}
+            >
+                {children}
+            </PlatformSidebar>
+        </IdentityProvider>
     );
 }

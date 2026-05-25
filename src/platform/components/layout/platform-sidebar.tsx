@@ -142,7 +142,7 @@ export function PlatformSidebar({
 
                 <SidebarInset className="min-h-dvh">
                     <div className="pointer-events-none fixed left-4 top-4 z-30 md:hidden">
-                        <SidebarToggle mobile className="pointer-events-auto rounded-full border border-neutral-200 bg-white shadow-sm" />
+                        <SidebarToggle mobile className="pointer-events-auto rounded-full border border-border bg-card shadow-sm" />
                     </div>
                     <main className="w-full">
                         {children}

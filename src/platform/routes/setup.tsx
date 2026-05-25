@@ -15,16 +15,16 @@ export default async function PlatformSetup(props: RequestInfo) {
     }
 
     return (
-        <div className="flex min-h-dvh w-full items-center justify-center bg-neutral-200 p-4 text-neutral-600">
-            <div className="w-full max-w-3xl rounded-2xl bg-neutral-50 p-8 shadow-md">
+        <div className="flex min-h-dvh w-full items-center justify-center bg-background p-4">
+            <div className="w-full max-w-3xl rounded-2xl border border-border/40 bg-card p-8">
                 <div className="mb-8">
-                    <p className="text-sm font-medium uppercase tracking-[0.2em] text-neutral-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
                         First-time setup
                     </p>
-                    <h1 className="mt-3 text-3xl font-semibold text-neutral-950">
+                    <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
                         Initialize your Whitewood installation
                     </h1>
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
+                    <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                         The first person here creates the root account and the organization profile.
                         After this step, public signup is closed and new members must be added by the root user.
                     </p>

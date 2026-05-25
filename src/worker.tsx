@@ -2,8 +2,10 @@ import { index, layout, prefix, render, route } from "rwsdk/router";
 import { defineApp } from "rwsdk/worker";
 import { setCommonHeaders } from "~/headers";
 import { Home } from "~/pages/home";
+import PublicArticlePage from "~/pages/article";
 import { PublicDocument } from "~/public/document";
 import PublicMediaObject from "~/routes/media";
+import SitemapRoute from "~/routes/sitemap";
 import { PlatformDocument } from "~platform/document";
 import ProtectedLayout from "./platform/layouts/protected";
 import { loadCurrentUser } from "./platform/middleware/auth";
@@ -19,6 +21,7 @@ import PlatformIndex from "./platform/routes/index";
 import PlatformSetup from "./platform/routes/setup";
 import PlatformUsers from "./platform/routes/users/index";
 import PlatformNewUser from "./platform/routes/users/new";
+import PlatformUpdateUser from "./platform/routes/users/update";
 import PlatformCollections from "./platform/routes/collections/index";
 import PlatformNewCollection from "./platform/routes/collections/new";
 import { User } from "./db/schema";
@@ -41,7 +44,9 @@ export default defineApp([
   loadCurrentUser,
   render(PublicDocument, [
     route("/", Home),
+    route("/sitemap.xml", SitemapRoute),
     route("/media/:key", PublicMediaObject),
+    route("/:slug", PublicArticlePage),
   ]),
   render(PlatformDocument, [
     prefix("/platform", [
@@ -62,6 +67,7 @@ export default defineApp([
         ]),
         route("/users", PlatformUsers),
         route("/users/new", PlatformNewUser),
+        route("/users/:uid/update", PlatformUpdateUser),
         route("/collections", PlatformCollections),
         route("/collections/new", PlatformNewCollection),
       ]),

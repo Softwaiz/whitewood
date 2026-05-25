@@ -132,12 +132,12 @@ export default function Home(props: Route.ComponentProps) {
     }, [fetcher.data]);
 
     return (
-        <div className="w-full min-h-dvh bg-neutral-100 text-neutral-600">
+        <div className="w-full min-h-dvh bg-background text-foreground">
             <title>
-                Content Editor - Softwaiz Org
+                Content Editor - Whitewood
             </title>
-            <div className="w-full h-12 bg-white border-b border-input flex items-center px-4 sticky top-0 z-50">
-                <NavLink href={`/platform`} className="text-xs flex items-center gap-2 hover:underline">
+            <div className="w-full h-12 bg-card border-b border-border flex items-center px-4 sticky top-0 z-50">
+                <NavLink href={`/platform`} className="text-xs flex items-center gap-2 text-muted-foreground hover:text-foreground transition">
                     <ArrowLeft size={14} />
                     Back to platform
                 </NavLink>

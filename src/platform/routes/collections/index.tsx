@@ -8,7 +8,7 @@ export default async function CollectionsList(props: RequestInfo) {
 
     if (!currentUser || !currentUser.organizationId) {
         return (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-600">
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-6 py-4 text-sm text-destructive">
                 You must be signed in to view collections.
             </div>
         );
@@ -17,7 +17,7 @@ export default async function CollectionsList(props: RequestInfo) {
     const collections = await CollectionResolver.instance().getCollections(currentUser.organizationId);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-10 pb-12">
             <PageTopbar
                 eyebrow="Collections"
                 title="Content collections"
@@ -27,58 +27,63 @@ export default async function CollectionsList(props: RequestInfo) {
                         {currentUser.role === "root" && (
                             <a
                                 href="/platform/collections/new"
-                                className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+                                className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:bg-foreground/85"
                             >
                                 New collection
                             </a>
                         )}
-                        <div className="rounded-full border border-neutral-200 bg-white px-4 py-2">
-                            <p className="text-sm text-neutral-500">Total collections</p>
-                            <p className="text-2xl font-semibold text-neutral-950">{collections.length}</p>
-                        </div>
                     </>
                 )}
             />
 
-            {collections.length === 0 ? (
-                <div className="mx-2 md:mx-4 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-6 py-10 text-center">
-                    <p className="text-base font-medium text-neutral-950">No collections yet</p>
-                    <p className="mt-2 text-sm text-neutral-500">
-                        Create your first collection to start categorizing articles.
-                    </p>
+            <section className="mx-auto max-w-7xl px-6 md:px-8">
+                <div className="mb-5 flex items-center gap-4">
+                    <div className="rounded-2xl border border-border/40 bg-card px-6 py-4">
+                        <p className="text-xs font-medium text-muted-foreground">Total collections</p>
+                        <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{collections.length}</p>
+                    </div>
                 </div>
-            ) : (
-                <div className="mx-2 md:mx-4 overflow-hidden rounded-2xl border border-neutral-200">
-                    <table className="min-w-full divide-y divide-neutral-200">
-                        <thead className="bg-neutral-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Label</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Slug</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Description</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Created</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-neutral-200">
-                            {collections.map((collection: Collection) => (
-                                <tr key={collection.id} className="hover:bg-neutral-50">
-                                    <td className="px-6 py-4 text-sm font-medium text-neutral-950">
-                                        {collection.label}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-neutral-600 font-mono">
-                                        {collection.slug}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-neutral-600 max-w-xs truncate">
-                                        {collection.description || "—"}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-neutral-600">
-                                        {collection.createdAt}
-                                    </td>
+
+                {collections.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+                        <p className="text-base font-medium text-foreground">No collections yet</p>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Create your first collection to start categorizing articles.
+                        </p>
+                    </div>
+                ) : (
+                    <article className="overflow-hidden rounded-2xl border border-border/40 bg-card">
+                        <table className="min-w-full divide-y divide-border">
+                            <thead>
+                                <tr className="bg-muted/40">
+                                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/70">Label</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/70">Slug</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/70">Description</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/70">Created</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {collections.map((collection: Collection) => (
+                                    <tr key={collection.id} className="transition-colors hover:bg-muted/20">
+                                        <td className="px-6 py-4 text-sm font-medium text-foreground">
+                                            {collection.label}
+                                        </td>
+                                        <td className="px-6 py-4 font-mono text-sm text-muted-foreground">
+                                            {collection.slug}
+                                        </td>
+                                        <td className="max-w-xs truncate px-6 py-4 text-sm text-muted-foreground">
+                                            {collection.description || "\u2014"}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                                            {collection.createdAt}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </article>
+                )}
+            </section>
         </div>
     );
 }

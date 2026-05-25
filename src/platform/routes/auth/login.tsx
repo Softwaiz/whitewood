@@ -37,11 +37,11 @@ export default async function PlatformLogin(props: RequestInfo) {
     }
 
     return (
-        <div className="w-full min-h-dvh bg-neutral-200 text-neutral-600 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-lg flex flex-col shadow-md rounded-md p-8 space-y-6 bg-neutral-50">
-                <div className="space-y-3 text-center">
-                    <h1 className="font-display text-xl md:text-2xl lg:text-3xl">Sign in to Whitewood</h1>
-                    <p className="text-sm leading-6 text-neutral-500">
+        <div className="flex min-h-dvh w-full flex-col items-center justify-center bg-background p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-border/40 bg-card p-8">
+                <div className="mb-8 text-center">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sign in to Whitewood</h1>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                         Whitewood accounts are provisioned inside the organization. If you need access, ask the root user to add you.
                     </p>
                 </div>

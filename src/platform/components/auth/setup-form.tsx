@@ -51,7 +51,7 @@ export function SetupForm() {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col space-y-4">
             {serverError && (
-                <div className="rounded-md border border-red-200 bg-red-100 p-3 text-center text-sm text-red-600">
+                <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
                     {serverError}
                 </div>
             )}

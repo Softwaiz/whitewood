@@ -17,31 +17,36 @@ import {
     SelectValue,
 } from "~components/ui/select";
 import { NavLink } from "~components/nav-link";
-import { createUser } from "~platform/api/create-user";
-import { CreateUserInput, CreateUserSchema } from "~platform/schemas/users";
+import { updateUser } from "~platform/api/update-user";
+import { UpdateUserInput, UpdateUserSchema } from "~platform/schemas/users";
+import type { User } from "~db/schema";
 
-export default function PlatformNewUser() {
+type Props = {
+    targetUser: User;
+};
+
+export function UserUpdateForm({ targetUser }: Props) {
     const [serverError, setServerError] = useState("");
     const {
         control,
         handleSubmit,
         formState: { isSubmitting },
-    } = useForm<CreateUserInput>({
-        resolver: standardSchemaResolver(CreateUserSchema),
+    } = useForm<UpdateUserInput>({
+        resolver: standardSchemaResolver(UpdateUserSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
-            email: "",
+            firstName: targetUser.firstName,
+            lastName: targetUser.lastName,
+            email: targetUser.email,
             password: "",
-            role: "member",
+            role: targetUser.role as "member" | "editor",
         },
     });
 
-    const onSubmit = async (data: CreateUserInput) => {
+    const onSubmit = async (data: UpdateUserInput) => {
         setServerError("");
 
         try {
-            const result = await createUser(data);
+            const result = await updateUser({ ...data, userId: targetUser.id });
 
             if (result?.error) {
                 setServerError(result.error);
@@ -50,7 +55,7 @@ export default function PlatformNewUser() {
 
             navigate("/platform/users");
         } catch (error: any) {
-            setServerError(error?.message || "Unable to create the user.");
+            setServerError(error?.message || "Unable to update the user.");
         }
     };
 
@@ -62,9 +67,11 @@ export default function PlatformNewUser() {
                     Back to users
                 </NavLink>
                 <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">Users</p>
-                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Add a new member</h1>
+                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                    Update {targetUser.firstName} {targetUser.lastName}
+                </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                    Create an account for someone in this organization. They will be able to sign in with the password you set here.
+                    Modify the member's details below. Leave the password field empty to keep it unchanged.
                 </p>
             </div>
 
@@ -120,7 +127,7 @@ export default function PlatformNewUser() {
                             control={control}
                             render={({ field, fieldState }) => (
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">New password (leave blank to keep)</Label>
                                     <PasswordInput id="password" disabled={isSubmitting} {...field} />
                                     {fieldState.error && <p className="text-xs text-red-500">{fieldState.error.message}</p>}
                                 </div>
@@ -158,7 +165,7 @@ export default function PlatformNewUser() {
                         <NavLink href="/platform/users">Cancel</NavLink>
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Creating user..." : "Add user"}
+                        {isSubmitting ? "Updating..." : "Update user"}
                     </Button>
                 </div>
             </form>

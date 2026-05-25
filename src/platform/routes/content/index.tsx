@@ -34,14 +34,14 @@ export default async function PlatformContentDetail({ params, request, ctx }: Re
     const postCollections = await CollectionResolver.instance().getCollectionsByPost(contentId);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-10 pb-12">
             <PageTopbar
                 eyebrow="Article"
                 title={content.title || "Untitled article"}
                 description={content.description || "No description yet. Open the editor to continue shaping this draft."}
                 actions={(
                     <>
-                        <Button asChild variant="outline" className="rounded-full">
+                        <Button asChild variant="outline" className="rounded-full border-border">
                             <a href="/platform/content/new">New article</a>
                         </Button>
                         <Button asChild className="rounded-full">
@@ -50,27 +50,33 @@ export default async function PlatformContentDetail({ params, request, ctx }: Re
                     </>
                 )}
             />
-            <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-neutral-200">
-                <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
-                    <span className="rounded-full bg-neutral-100 px-3 py-1 font-medium uppercase tracking-[0.18em] text-neutral-700">
-                        {content.published ? "Published" : "Draft"}
-                    </span>
-                    <span>Slug: {content.slug}</span>
-                </div>
-                {postCollections.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5 items-center">
-                        <span className="text-xs text-neutral-400 font-medium">Collections:</span>
-                        {postCollections.map((col: Collection) => (
-                            <span key={col.id} className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">
-                                {col.label}
-                            </span>
-                        ))}
+
+            <section className="mx-auto max-w-7xl px-6 md:px-8">
+                <article className="rounded-2xl border border-border/40 bg-card p-6">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] ${content.published ? 'bg-accent/15 text-accent' : 'bg-muted text-muted-foreground'}`}>
+                            <span className={`size-1.5 rounded-full ${content.published ? 'bg-accent' : 'bg-muted-foreground/40'}`} />
+                            {content.published ? "Published" : "Draft"}
+                        </span>
+                        <span className="text-sm text-muted-foreground">Slug: <span className="font-mono text-xs text-muted-foreground/70">{content.slug}</span></span>
                     </div>
-                )}
+                    {postCollections.length > 0 && (
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-medium text-muted-foreground/60">Collections:</span>
+                            {postCollections.map((col: Collection) => (
+                                <span key={col.id} className="rounded-full bg-secondary/60 px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground/80">
+                                    {col.label}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </article>
             </section>
 
-            <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-neutral-200">
-                <Render data={article} config={PuckEditorConfig} />
+            <section className="mx-auto max-w-7xl px-6 md:px-8">
+                <article className="rounded-2xl border border-border/40 bg-card p-8">
+                    <Render data={article} config={PuckEditorConfig} />
+                </article>
             </section>
         </div>
     );

@@ -65,4 +65,18 @@ export class UserResolver {
 
         return usersList;
     }
+
+    async updateUser(userId: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const [user] = await db
+            .update(users)
+            .set({
+                ...data,
+                updatedAt: new Date().toISOString(),
+            })
+            .where(eq(users.id, userId))
+            .returning()
+            .execute();
+
+        return user;
+    }
 }

@@ -46,7 +46,7 @@ export function RegisterForm() {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col space-y-2">
             {serverError && (
-                <div className="w-full bg-red-100 text-red-600 border border-red-200 p-3 rounded-md text-sm text-center">
+                <div className="w-full rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
                     {serverError}
                 </div>
             )}
@@ -131,13 +131,13 @@ export function RegisterForm() {
 
             <div className="w-full flex flex-row items-center justify-center gap-4 mt-6">
                 <hr className="grow" />
-                <span className="text-xs text-neutral-400">OR</span>
+                <span className="text-xs text-muted-foreground/50">OR</span>
                 <hr className="grow" />
             </div>
 
             <Button
                 size="lg"
-                className="w-full text-neutral-700 hover:text-neutral-900 border"
+                className="w-full border text-foreground hover:text-foreground/80"
                 variant="outline"
                 type="button"
                 asChild>
@@ -146,8 +146,8 @@ export function RegisterForm() {
                 </a>
             </Button>
 
-            <p className="text-sm text-center text-neutral-500 mt-4">
-                Already have an account? <a href="/platform/auth/login" className="text-neutral-900 font-medium hover:underline">Log in</a>
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+                Already have an account? <a href="/platform/auth/login" className="font-medium text-primary hover:underline">Log in</a>
             </p>
         </form>
     );
