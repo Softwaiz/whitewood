@@ -23,14 +23,14 @@ export default async function PlatformEditArticle({ params, request, ctx }: Requ
         ? await CollectionResolver.instance().getCollections(ctx.user.organizationId)
         : [];
 
-    const collectionOptions = collections.map((c) => ({
+    const collectionOptions = collections.map((c: { id: string; label: string; slug: string }) => ({
         id: c.id,
         label: c.label,
         slug: c.slug,
     }));
 
     const postCollections = await CollectionResolver.instance().getCollectionsByPost(contentId);
-    const initialCollectionIds = postCollections.map((c) => c.id);
+    const initialCollectionIds = postCollections.map((c: { id: string }) => c.id);
 
     return (
         <Suspense fallback={<div>Loading editor...</div>}>

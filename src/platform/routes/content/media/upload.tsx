@@ -37,7 +37,7 @@ export default async function PlatformMediaUpload({ request, ctx }: RequestInfo)
         },
     });
 
-    return Response.json<MediaUploadResponse>({
+    return Response.json({
         media: {
             url: path,
             path,

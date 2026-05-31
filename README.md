@@ -29,26 +29,48 @@ Deploys to **Cloudflare Workers** with a single command.
 
 ## Getting Started
 
+### 1. Fork the repository
+
+Fork this repo on GitHub. This lets you receive upstream updates by syncing your fork, and Cloudflare will auto-deploy from it.
+
+### 2. Customize your project name
+
+Edit `wrangler.jsonc` and change the `"name"` field to your own project name:
+
+```jsonc
+{
+  "name": "my-blog",
+  // ...
+}
+```
+
+### 3. Install and run locally
+
 ```shell
-# Clone the repository
-git clone <repo-url> whitewood
+git clone <your-fork-url> whitewood
 cd whitewood/app
-
-# Install dependencies
 pnpm install
-
-# Generate Worker types (run after every env change)
 pnpm generate
+```
 
-# Create your D1 database (first time only)
-npx wrangler d1 create whitewood-db
+### 4. Create D1 database and R2 bucket
 
-# Update wrangler.jsonc with the returned database_id, then:
+```shell
+# Create the database (replace "my-blog-db" with your name)
+npx wrangler d1 create my-blog-db
 
-# Run migrations locally
+# Copy the returned database_id into wrangler.jsonc → d1_databases[0].database_id
+
+# Create the media bucket
+npx wrangler r2 bucket create whitewood-media
+
+# Run migrations
 pnpm migrate:dev
+```
 
-# Start the dev server
+### 5. Start developing
+
+```shell
 pnpm dev
 ```
 
@@ -187,18 +209,25 @@ Never mix reads and writes in the same function.
 
 ## Deployment
 
+Whitewood is designed for **Cloudflare Workers + GitHub integration**. Connect your fork to Cloudflare and every push to `main` triggers an automatic deploy.
+
+### Manual deploy
+
 ```shell
-# Deploy to Cloudflare Workers
 pnpm release
 ```
 
-This runs `clean → build → wrangler deploy`. Make sure your `wrangler.jsonc` is configured with the correct `database_id` and bucket name for production.
+This runs `clean → build → wrangler deploy`.
 
-Before first deployment:
-1. Create a production D1 database: `npx wrangler d1 create whitewood-db`
-2. Update `wrangler.jsonc` with the production database ID
-3. Create a production R2 bucket: `npx wrangler r2 bucket create whitewood-media`
-4. Run migrations: `pnpm migrate:prod`
+### Before first deployment
+
+1. Create a production D1 database: `npx wrangler d1 create my-blog-db`
+2. Update `wrangler.jsonc` with the production `database_id`
+3. Run production migrations: `pnpm migrate:prod`
+
+### Staying up to date
+
+Because you forked the repo, you can sync upstream changes via GitHub's **Sync fork** button — and Cloudflare will redeploy automatically.
 
 ## First-Time Setup
 

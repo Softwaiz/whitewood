@@ -11,7 +11,7 @@ export default async function PlatformNewArticle({ request, ctx }: RequestInfo) 
         ? await CollectionResolver.instance().getCollections(ctx.user.organizationId)
         : [];
 
-    const collectionOptions = collections.map((c) => ({
+    const collectionOptions = collections.map((c: { id: string; label: string; slug: string }) => ({
         id: c.id,
         label: c.label,
         slug: c.slug,

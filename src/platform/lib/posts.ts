@@ -2,7 +2,7 @@ import { PostResolver } from "~platform/@resolvers/post";
 
 const DEFAULT_ARTICLE_SLUG = "story/this-is-my-story";
 
-export function slugify(value: string) {
+function slugify(value: string) {
     return value
         .toLowerCase()
         .trim()

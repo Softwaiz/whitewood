@@ -35,13 +35,13 @@ function buildArticleSchema(post: {
   id: string;
   title: string;
   description: string;
-  language: string;
-  keywords: string;
+  language: string | null;
+  keywords: string | null;
   slug: string;
   createdAt: string;
   updatedAt: string;
 }, authorName: string | null, url: string) {
-  const keywords = parseKeywords(post.keywords);
+  const keywords = parseKeywords(post.keywords ?? "[]");
 
   return {
     "@context": "https://schema.org",

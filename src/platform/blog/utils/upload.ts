@@ -18,11 +18,11 @@ export async function prepareFileUpload(file: File, scope: UploadScope | undefin
             method: "GET",
         }
     )
-        .then((res) => res.json())
+        .then((res) => res.json() as Promise<{ data?: PrepareUploadSuccess; error?: unknown }>)
         .then((response) => {
             if (response.data) {
                 return {
-                    ...response as PrepareUploadSuccess,
+                    ...response.data,
                     type: file.type,
                     size: file.size
                 }
