@@ -2,6 +2,10 @@ import { db } from "~db/db";
 import { Collection, collections, postCollections } from "~db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 
+declare global {
+    var collectionResolver: CollectionResolver | undefined;
+}
+
 export class CollectionResolver {
 
     static instance() {

@@ -1,8 +1,5 @@
 import { Render } from "@puckeditor/core";
-import { and, eq } from "drizzle-orm";
 import type { RequestInfo } from "rwsdk/worker";
-import { db } from "~db/db";
-import { posts } from "~db/schema";
 import type { Collection } from "~db/schema";
 import { PuckEditorConfig } from "~platform/blog/components/blocks/config";
 import { Button } from "~components/ui/button";

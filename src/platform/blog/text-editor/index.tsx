@@ -2,7 +2,6 @@
 import "./index.scss";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { } from "@lexical/react/LexicalLinkPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
